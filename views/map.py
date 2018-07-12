@@ -45,10 +45,10 @@ class Map(QLabel):
     def get_right_profile(self):
         return self.right_profile
 
-    def paint(self):
-        if self.points is self.last_points:
+    def paint(self, force=False):
+        if [[e.x, e.y, e.angle] for e in self.points] == self.last_points and not force:
             return
-        self.last_points = list(self.points)
+        self.last_points = [[e.x, e.y, e.angle] for e in self.points]
         self.create_profiles()
         pixmap = QPixmap(self.field_pixmap)
         # pixmap.fill(QColor(0, 0, 0, 0))
@@ -60,6 +60,8 @@ class Map(QLabel):
         qp.end()
         self.setPixmap(pixmap)
 
+        return True
+
     def create_profiles(self):
         _, self.middle_profile = pf.generate(self.points,
                                        pf.FIT_HERMITE_QUINTIC,
@@ -70,8 +72,8 @@ class Map(QLabel):
                                        max_jerk=25
                                  )
         self.modifier = pf.modifiers.TankModifier(self.middle_profile).modify(0.6)
-        self.left_profile = self.modifier.getLeftTrajectory()
-        self.right_profile = self.modifier.getRightTrajectory()
+        self.left_profile = self.modifier.getRightTrajectory()
+        self.right_profile = self.modifier.getLeftTrajectory()
         if self.drag_mode is None:
             self.chart.setProfiles(self.middle_profile, self.left_profile, self.right_profile)
 
@@ -201,6 +203,7 @@ class Map(QLabel):
             self.drag_offset = None
             self.ghost_point = None
             self.create_profiles()
+            self.paint(force=True)
             self.repaint()
 
     def draw_field_box(self, qp, grid=False):
