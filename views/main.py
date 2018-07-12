@@ -1,8 +1,9 @@
 import os
 import json
 import math
+import copy
 
-from path import Path, Waypoint
+import pathfinder as pf
 
 from PyQt5 import uic
 from PyQt5.QtCore import QSettings, Qt
@@ -19,15 +20,13 @@ class MainWindow(QMainWindow):
         self.background_label.setPixmap(field_pixmap.scaled(self.background_label.width(),self.background_label.height(), Qt.KeepAspectRatio))
         
         self.points = [
-            Waypoint(0.6, 1.2, 0),
-            Waypoint(4.2, 1.2, 0),
-            Waypoint(6, 3, math.radians(90)),
-            Waypoint(5.9, 15*0.3, math.radians(95)),
-            Waypoint(24.5*0.3, 20.5*0.3, math.radians(-10))
+            pf.Waypoint(0.6, 1.2, 0),
+            pf.Waypoint(4.2, 1.2, 0),
+            pf.Waypoint(6, 3, math.radians(90)),
+            pf.Waypoint(5.9, 15*0.3, math.radians(95)),
+            pf.Waypoint(24.5*0.3, 20.5*0.3, math.radians(-10))
         ]
-
-        self.profile = Path(self.points, 0.6, d_t=0.1)
-        self.profile.build_path()
+        self.create_profiles()
 
         self.drag_mode = None
         self.point_being_dragged = None
@@ -35,6 +34,19 @@ class MainWindow(QMainWindow):
         self.ghost_point = None
 
         self.initUI()
+
+    def create_profiles(self):
+        _, self.middle_profile = pf.generate(self.points,
+                                       pf.FIT_HERMITE_QUINTIC,
+                                       pf.SAMPLES_HIGH,
+                                       dt=0.1,
+                                       max_velocity=3,
+                                       max_acceleration=5,
+                                       max_jerk=25)
+        modifier = pf.modifiers.TankModifier(self.middle_profile).modify(0.6)
+        self.left_profile = modifier.getLeftTrajectory()
+        self.right_profile = modifier.getRightTrajectory()
+
 
     def _gui_point_to_path_point(self, x, y):
         pnt_scale = (self.canvas_label.size().height() - 30) / 8.2296
@@ -44,7 +56,7 @@ class MainWindow(QMainWindow):
 
     def get_arm_gui_point(self, pnt):
         pnt_x, pnt_y = self.get_path_gui_point(pnt)
-        return (pnt_x + math.cos(pnt.yaw) * 20), (pnt_y + math.sin(pnt.yaw) * 20)
+        return (pnt_x + math.cos(pnt.angle) * 20), (pnt_y + math.sin(pnt.angle) * 20)
 
     def get_path_gui_point(self, pnt):
         pnt_scale = (self.canvas_label.size().height() - 30) / 8.2296
@@ -75,50 +87,61 @@ class MainWindow(QMainWindow):
 
     def get_closest_path_point(self, pos, min_dist=None):
         closest_pnt = None
-        closest_dist = 1e10
-        for pnt in self.profile.get_path():
+        closest_dist = 1e100
+        for pnt in self.middle_profile:
             pnt_x, pnt_y = self.get_path_gui_point(pnt)
             dist = math.sqrt((pnt_y - pos.y())**2 + (pnt_x - pos.x())**2)
             if dist < closest_dist and (min_dist is None or dist < min_dist):
                 closest_pnt = pnt
+                closest_dist = dist
         return closest_pnt
 
     def mousePressEvent(self, QMouseEvent):
         pos = QMouseEvent.pos()
+
         if QApplication.keyboardModifiers() & Qt.ControlModifier:
             pnt = self.get_closest_point(pos, 20)
             if pnt is not None:
                 self.points.remove(pnt)
             else:
                 pnt = self.get_closest_path_point(pos, 20)
-                index = self.points.index(pnt.end_waypoint)
-                new_point = Waypoint(*self._gui_point_to_path_point(pos.x(), pos.y()))
-                print(pnt.end_waypoint)
-                print(pnt.start_waypoint)
-                new_point.yaw = math.atan2(pnt.end_waypoint.y - pnt.start_waypoint.y, pnt.end_waypoint.x - pnt.start_waypoint.x)
-                self.points.insert(index, new_point)
-            self.profile = Path(self.points, 0.6, d_t=0.1)
-            self.profile.build_path()
+                new_point = pf.Waypoint(pnt.x, pnt.y, pnt.heading)
+                if pnt is not None:
+                    index = None
+                    for i in range(self.middle_profile.index(pnt), len(self.middle_profile)):
+                        profile_pnt = self.middle_profile[i]
+                        for j in range(len(self.points)):
+                            waypnt = self.points[j]
+                            dist = math.sqrt((waypnt.y - profile_pnt.y)**2 + (waypnt.x - profile_pnt.x)**2)
+                            if dist < 0.2:
+                                self.points.insert(j, new_point)
+                                break
+                        else:
+                            continue
+                        break
+            self.create_profiles()
             self.canvas_label.repaint()
+
         elif QApplication.keyboardModifiers() & Qt.AltModifier:
             pnt = self.get_closest_arm(pos, 20)
             if pnt is not None:
                 if self.point_being_dragged is None:
-                    self.drag_mode = "yaw"
+                    self.drag_mode = "angle"
                     self.point_being_dragged = pnt
-                    self.ghost_point = pnt.copy()
+                    self.ghost_point = pf.Waypoint(pnt.x, pnt.y, pnt.angle)
                     arm_x, arm_y = self.get_arm_gui_point(self.point_being_dragged)
                     self.drag_offset = [
                         pos.x() - arm_x,
                         pos.y() - arm_y
                     ]
+                    
         else:
             pnt = self.get_closest_point(pos, 20)
             if pnt is not None:
                 if self.point_being_dragged is None:
                     self.drag_mode = "pos"
                     self.point_being_dragged = pnt
-                    self.ghost_point = pnt.copy()
+                    self.ghost_point = pf.Waypoint(pnt.x, pnt.y, pnt.angle)
                     pnt_x, pnt_y = self.get_path_gui_point(pnt)
                     self.drag_offset = [
                         pos.x() - pnt_x,
@@ -134,13 +157,12 @@ class MainWindow(QMainWindow):
                     pos.x() - self.drag_offset[0], 
                     pos.y() - self.drag_offset[1]
                 )
-            elif self.drag_mode == 'yaw':
+            elif self.drag_mode == 'angle':
                 x, y = self.get_path_gui_point(self.point_being_dragged)
                 w = x - (pos.x() - self.drag_offset[0])
                 h = y - (pos.y() - self.drag_offset[1])
-                self.point_being_dragged.yaw = math.atan2(h, w) + math.pi
-            self.profile = Path(self.points, 0.6, d_t=0.1)
-            self.profile.build_path()
+                self.point_being_dragged.angle = math.atan2(h, w) + math.pi
+            self.create_profiles()
             self.canvas_label.repaint()
 
 
@@ -150,8 +172,7 @@ class MainWindow(QMainWindow):
             self.point_being_dragged = None
             self.drag_offset = None
             self.ghost_point = None
-            self.profile = Path(self.points, 0.6, d_t=0.1)
-            self.profile.build_path()
+            self.create_profiles()
             self.canvas_label.repaint()
         
     def initUI(self):
@@ -201,7 +222,7 @@ class MainWindow(QMainWindow):
         pen.setWidth(3)
         qp.setPen(pen)
 
-        for path in [self.profile.get_left_path(), self.profile.get_right_path()]:
+        for path in [self.left_profile, self.right_profile]:
             for i in range(1, len(path)):
                 pnt = path[i]
                 pnt2 = path[i-1]
@@ -213,9 +234,9 @@ class MainWindow(QMainWindow):
         pen.setColor(QColor(20, 240, 200))
         pen.setWidth(3)
         qp.setPen(pen)
-        for i in range(1, len(self.profile.get_path())):
-            pnt = self.profile.get_path()[i]
-            pnt2 = self.profile.get_path()[i-1]
+        for i in range(1, len(self.middle_profile)):
+            pnt = self.middle_profile[i]
+            pnt2 = self.middle_profile[i-1]
             qp.drawLine(
                 *self.get_path_gui_point(pnt),
                 *self.get_path_gui_point(pnt2)
