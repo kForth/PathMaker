@@ -7,32 +7,34 @@
     <x>0</x>
     <y>0</y>
     <width>1100</width>
-    <height>550</height>
+    <height>700</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1100</width>
+    <height>700</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1100</width>
+    <height>700</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Path Maker</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="canvas_label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>800</width>
-      <height>400</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QLabel" name="background_label">
     <property name="geometry">
      <rect>
@@ -43,14 +45,239 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
-   <zorder>background_label</zorder>
-   <zorder>canvas_label</zorder>
+   <widget class="QLabel" name="chart_label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>420</y>
+      <width>800</width>
+      <height>250</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="pos_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>600</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Position</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="vel_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>625</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Velocity</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="accel_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>650</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Acceleration</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="left_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>545</y>
+      <width>110</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Left Profile</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="right_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>570</y>
+      <width>110</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Right Profile</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="middle_profile_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>520</y>
+      <width>110</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Middle Profile</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="middle_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>520</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="left_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>545</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="right_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>570</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="vel_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>625</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="pos_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>600</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="accel_line_label">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>650</y>
+      <width>50</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid #ddd;
+background: #eee;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -61,8 +288,13 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
