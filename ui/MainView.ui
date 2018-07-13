@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
+    <width>1060</width>
     <height>700</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1100</width>
+    <width>1060</width>
     <height>700</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1100</width>
+    <width>1060</width>
     <height>700</height>
    </size>
   </property>
@@ -490,7 +490,7 @@ background: #eee;
    <widget class="QLabel" name="cursor_val_label">
     <property name="geometry">
      <rect>
-      <x>710</x>
+      <x>80</x>
       <y>430</y>
       <width>90</width>
       <height>20</height>
@@ -526,7 +526,7 @@ font-weight: 600;
      <rect>
       <x>980</x>
       <y>10</y>
-      <width>110</width>
+      <width>70</width>
       <height>32</height>
      </rect>
     </property>
@@ -552,7 +552,7 @@ font-weight: 600;
      <rect>
       <x>820</x>
       <y>50</y>
-      <width>270</width>
+      <width>230</width>
       <height>360</height>
      </rect>
     </property>
@@ -563,7 +563,7 @@ font-weight: 600;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1100</width>
+     <width>1060</width>
      <height>22</height>
     </rect>
    </property>

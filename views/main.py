@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPainter, QColor, QPen, QPixmap
 
 from views.map import Map
 from views.chart import Chart
-from views.waypoint import WaypointWidget
+from views.export import ExportWindow
 
 class MainWindow(QMainWindow):
     
@@ -89,7 +89,12 @@ class MainWindow(QMainWindow):
         self.show()
 
     def export(self):
-        
+        self.export_Window = ExportWindow(
+            self.map.get_points(),
+            self.map.get_middle_profile(), 
+            self.map.get_left_profile(), 
+            self.map.get_right_profile()
+        )
 
     def add_waypoint(self, x=0, y=0, angle=0):
         pnt = pf.Waypoint(x, y, angle)
@@ -98,6 +103,7 @@ class MainWindow(QMainWindow):
         self.update_waypoints()
 
     def update_waypoints(self):
+        self.waypoint_table.setRowCount(len(self.map.points))
         for i in range(len(self.map.points)):
             pnt = self.map.points[i]
             self.waypoint_table.setItem(i, 0, QTableWidgetItem(str(round(pnt.x, 2))))

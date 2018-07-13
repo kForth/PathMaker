@@ -10,8 +10,8 @@ class Map(QLabel):
     def __init__(self, parent, chart, legend_info):
         super().__init__(parent)
         self.parent = parent
-        self.legend_info = legend_info
         self.chart = chart
+        self.legend_info = legend_info
         self.setFixedSize(self.parent.size())
         self.field_pixmap = QPixmap('img/powerup_field.png')
         self.field_rect = QRect(33, 15, 732, 367)
@@ -31,7 +31,7 @@ class Map(QLabel):
         self.ghost_point = None
 
     def get_points(self):
-        return points
+        return self.points
 
     def set_points(self, new_points):
         self.points = new_points
@@ -132,6 +132,7 @@ class Map(QLabel):
         if QApplication.keyboardModifiers() & Qt.ControlModifier:
             pnt = self.get_closest_waypoint(pos, 20)
             if pnt is not None:
+                index = self.points.index(pnt)
                 self.points.remove(pnt)
             else:
                 pnt = self.get_closest_path_point(pos, 20)
