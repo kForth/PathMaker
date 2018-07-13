@@ -12,6 +12,10 @@ class ExportWindow(QDialog):
         uic.loadUi('ui/ExportView.ui', self)
         self.setFixedSize(self.size())
 
+        self.path = path
+        self.lpath = lpath
+        self.rpath = rpath
+
         self.save_button.clicked.connect(self.save_button_clicked)
         self.cancel_button.clicked.connect(self.close)
 
@@ -22,9 +26,15 @@ class ExportWindow(QDialog):
         self.java_radio.toggled.connect(self.update_preview)
         self.cpp_radio.toggled.connect(self.update_preview)
         self.python_radio.toggled.connect(self.update_preview)
+        self.class_name_input.textChanged.connect(self.update_preview)
+        self.package_name_input.textChanged.connect(self.update_preview)
+        self.csv_headers_box.toggled.connect(self.update_preview)
 
+        self.csv_settings.setVisible(False)
         self.java_settings.setVisible(False)
+        self.cpp_settings.setVisible(False)
 
+        self.update_preview()
         self.show()
 
     def update_preview(self):
@@ -32,43 +42,41 @@ class ExportWindow(QDialog):
         filename = "data.txt"
         if self.csv_radio.isChecked():
             if self.trajectories_radio.isChecked():
-                ['time', 'position', 'velocity', 'acceleration', 'jerk', 'x', 'y', 'heading']
+                # new_string, filename = self.get_csv_trajectories_str()
                 pass
-
             elif self.waypoints_radio.isChecked():
-                # open(filename, 'w+').write(self.get_csv_waypoints_str())
                 new_string, filename = self.get_csv_waypoints_str()
 
         elif self.json_radio.isChecked():
             if self.trajectories_radio.isChecked():
+                # new_string, filename = self.get_json_trajectories_str()
                 pass
             elif self.waypoints_radio.isChecked():
-                # open(filename, 'w+').write(self.get_json_waypoints_str())
                 new_string, filename = self.get_json_waypoints_str()
 
         elif self.java_radio.isChecked():
             if self.trajectories_radio.isChecked():
-                [ass]
+                new_string, filename = self.get_java_trajectories_str()
             elif self.waypoints_radio.isChecked():
-                # open(filename, 'w+').write(self.get_java_waypoints_str())
                 new_string, filename = self.get_java_waypoints_str()
 
         elif self.cpp_radio.isChecked():
             if self.trajectories_radio.isChecked():
+                # new_string, filename = self.get_cpp_trajectories_str()
                 pass
             elif self.waypoints_radio.isChecked():
-                pass
+                new_string, filename = self.get_cpp_waypoints_str()
 
         elif self.python_radio.isChecked():
             if self.trajectories_radio.isChecked():
-                pass
+                new_string, filename = self.get_python_trajectories_str()
             elif self.waypoints_radio.isChecked():
-                pass
+                new_string, filename = self.get_python_waypoints_str()
 
-        # self.csv_settings.setVisible(self.csv_radio.isChecked())
+        self.csv_settings.setVisible(self.csv_radio.isChecked())
         # self.json_settings.setVisible(self.json_radio.isChecked())
         self.java_settings.setVisible(self.java_radio.isChecked())
-        # self.cpp_settings.setVisible(self.cpp_radio.isChecked())
+        self.cpp_settings.setVisible(self.cpp_radio.isChecked())
         # self.python_settings.setVisible(self.python_radio.isChecked())
 
         self.file_text = new_string
@@ -78,7 +86,8 @@ class ExportWindow(QDialog):
     def get_csv_waypoints_str(self):
         headers = ['x', 'y', 'angle']
         dump_str = ""
-        dump_str += ", ".join(headers) + "\n"
+        if self.csv_headers_box.isChecked():
+            dump_str += ", ".join(headers) + "\n"
         for point in self.points:
             dump_str += ", ".join([str(eval("point." + h, {'point': point})) for h in headers]) + "\n"
         return dump_str, "waypoints.csv"
@@ -93,6 +102,30 @@ class ExportWindow(QDialog):
         ]
         return json.dumps(data), "waypoints.json"
 
+    def get_java_trajectories_str(self):
+        class_name = self.class_name_input.text()
+        package_name = self.package_name_input.text()
+        dump_str = ""
+        if package_name:
+            dump_str += "package {};\n\n".format(package_name)
+        dump_str += "import jaci.pathfinder.Pathfinder;\nimport jaci.pathfinder.Trajectory;\nimport jaci.pathfinder.Waypoint;\n\n"
+        dump_str += "public class {} {{\n".format(class_name)
+
+        dump_str += "    public static Segment[] trajectory = {\n"
+        dump_str += ",\n".join(["        new Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.path])
+        dump_str += " \n   }\n"
+        
+        dump_str += "    public static Segment[] leftTrajectory = {\n"
+        dump_str += ",\n".join(["        new Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.lpath])
+        dump_str += " \n   }\n"
+
+        dump_str += "    public static Segment[] rightTrajectory = {\n"
+        dump_str += ",\n".join(["        new Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.rpath])
+        dump_str += " \n   }\n"
+
+        dump_str += "}\n"
+        return dump_str, "{}.java".format(class_name)
+
     def get_java_waypoints_str(self):
         class_name = self.class_name_input.text()
         package_name = self.package_name_input.text()
@@ -106,6 +139,40 @@ class ExportWindow(QDialog):
         dump_str += " \n   }\n"
         dump_str += "}\n"
         return dump_str, "{}.java".format(class_name)
+
+    def get_cpp_waypoints_str(self):
+        dump_str = ""
+        dump_str += "#include <pathfinder.h>\n\n"
+        dump_str += "Waypoint *points = (Waypoint*)malloc(sizeof(Waypoint) * {});\n\n".format(len(self.points))
+        for i in range(len(self.points)):
+            point = self.points[i]
+            dump_str += "    points[{}] = {{ {}, {}, {} }};\n".format(i, point.x, point.y, point.angle)
+
+        return dump_str, "waypoints.c".format(class_name)
+
+    def get_python_waypoints_str(self):
+        dump_str = ""
+        dump_str += "import pathfinder as pf\n\n"
+        dump_str += "waypoints = [\n"
+        dump_str += ",\n".join(["    pf.Waypoint({}, {}, {})".format(point.x, point.y, point.angle) for point in self.points])
+        dump_str += "\n]\n"
+        return dump_str, "waypoints.py"
+
+    def get_python_trajectories_str(self):
+        dump_str = ""
+        dump_str += "import pathfinder as pf\n\n"
+        dump_str += "trajectory = [\n"
+        dump_str += ",\n".join(["    pf.Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.path])
+        dump_str += "\n]\n"
+
+        dump_str += "left_trajectory = [\n"
+        dump_str += ",\n".join(["    pf.Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.lpath])
+        dump_str += "\n]\n"
+
+        dump_str += "right_trajectory = [\n"
+        dump_str += ",\n".join(["    pf.Segment({}, {}, {}, {}, {}, {}, {}, {})".format(point.dt, point.x, point.y, point.position, point.velocity, point.acceleration, point.jerk, point.heading) for point in self.rpath])
+        dump_str += "\n]\n"
+        return dump_str, "path.py"
 
     def save_button_clicked(self):
         file_str = self.file_text

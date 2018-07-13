@@ -16,18 +16,39 @@ class Chart(QLabel):
         self.drag_offset = [0, 0]
         self.last_profile = None
         self.profile = None
+        self.left_profile = None
+        self.right_profile = None
         self.last_move_point = None
         self.x_scale = 1
         self.y_scale = 1
         self.x_min = 0
+        self.x_max = 5
         self.y_min = 0
+        self.y_max = 10
 
-    def setup_legend(self, home_button, left_box, right_box, middle_box, pos_box, vel_box, accel_box, x_slider, y_slider, x_slider_label, y_slider_label, curor_val_label):
+    def reset(self):
+        self.drag_offset = [0, 0]
+        self.last_profile = None
+        self.profile = None
+        self.left_profile = None
+        self.right_profile = None
+        self.last_move_point = None
+        self.x_scale = 1
+        self.y_scale = 1
+        self.x_min = 0
+        self.x_max = 5
+        self.y_min = 0
+        self.y_max = 10
+        pixmap = QPixmap(self.size())
+        pixmap.fill(QColor(0, 0, 0, 0))
+        self.setPixmap(pixmap)
+
+    def setup_legend(self, home_button, first_box, second_box, main_box, pos_box, vel_box, accel_box, x_slider, y_slider, x_slider_label, y_slider_label, curor_val_label):
         self.home_button = home_button
         self.home_button.clicked.connect(self.reset_view)
-        self.left_box = left_box
-        self.middle_box = middle_box
-        self.right_box = right_box
+        self.first_box = first_box
+        self.main_box = main_box
+        self.second_box = second_box
         self.pos_box = pos_box
         self.vel_box = vel_box
         self.accel_box = accel_box
@@ -60,13 +81,13 @@ class Chart(QLabel):
         self.x_slider.setValue(10)
         self.y_slider.setValue(10)
 
-    def paint(self):
+    def paint(self, force=False):
         pos = self.mapFromGlobal(QCursor.pos())
         if pos.x() > self.x() and pos.x() < self.x() + self.width() and pos.y() > self.y() and pos.y() < self.y() + self.height():
             label = "x:{} y:{}".format(*[round(e, 1) for e in self.convert_gui_point_to_chart_point(pos.x(), pos.y())])
             self.curor_val_label.setText(label)
 
-        if self.profile is self.last_profile:
+        if self.profile is self.last_profile and not False:
             return
         self.last_profile = list(self.profile)
         pixmap = QPixmap(self.size())
@@ -96,11 +117,11 @@ class Chart(QLabel):
         self.x_scale = self.axis_rect.width() / (self.x_max - self.x_min) * x_slider_scale
 
         profiles = []
-        if self.left_box.isChecked():
+        if self.first_box.isChecked():
             profiles += self.left_profile
-        if self.right_box.isChecked():
+        if self.second_box.isChecked():
             profiles += self.right_profile
-        if self.middle_box.isChecked():
+        if self.main_box.isChecked():
             profiles += self.profile
         y_vals = []
         if self.accel_box.isChecked():
@@ -136,6 +157,11 @@ class Chart(QLabel):
             x = self.axis_rect.x() + i * x_tick_rate
             y = self.axis_rect.y() + self.axis_rect.height()
             label = str(round(i * x_tick_rate / self.x_scale - self.drag_offset[0] / self.x_scale - self.x_min, 2))
+            temp_pen = QPen(pen)
+            temp_pen.setColor(QColor(50, 50, 50, 50))
+            qp.setPen(temp_pen)
+            qp.drawLine(x, self.y(), x, self.y() + self.height())
+            qp.setPen(pen)
             qp.drawLine(x, y, x, y + 5)
             qp.drawText(QRect(x - 15, y + 10, 30, 15), Qt.AlignCenter, label);
 
@@ -150,6 +176,11 @@ class Chart(QLabel):
             x = self.axis_rect.x()
             y = self.axis_rect.y() + self.axis_rect.height() - i * y_tick_rate
             label = str(round((i * y_tick_rate + self.drag_offset[1]) / self.y_scale + self.y_min, 1))
+            temp_pen = QPen(pen)
+            temp_pen.setColor(QColor(50, 50, 50, 50))
+            qp.setPen(temp_pen)
+            qp.drawLine(self.x(), y, self.x() + self.width(), y)
+            qp.setPen(pen)
             qp.drawLine(x-5, y, x, y)
             qp.drawText(QRect(x-50, y-7, 40, 15), Qt.AlignRight, label);
 
@@ -164,7 +195,7 @@ class Chart(QLabel):
 
         pen = QPen()
         pen.setWidth(2)
-        keys = ['left', 'right', 'middle']
+        keys = ['first', 'second', 'main']
         val_keys = ['pos', 'vel', 'accel']
         for p in range(len(keys)):
             if not eval("self." + keys[p] + "_box").isChecked():

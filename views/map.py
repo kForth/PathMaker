@@ -30,6 +30,12 @@ class Map(QLabel):
         self.drag_offset = None
         self.ghost_point = None
 
+    def reset(self):
+        self.points = []
+        self.middle_profile = None
+        self.left_profile = None
+        self.right_profile = None
+
     def get_points(self):
         return self.points
 
@@ -55,27 +61,32 @@ class Map(QLabel):
         qp = QPainter()
         qp.begin(pixmap)
         self.draw_field_box(qp)
-        self.draw_path(qp)
+        if self.middle_profile:
+            self.draw_path(qp)
         self.draw_waypoints(qp)
         qp.end()
         self.setPixmap(pixmap)
 
         return True
 
-    def create_profiles(self):
-        _, self.middle_profile = pf.generate(self.points,
-                                       pf.FIT_HERMITE_QUINTIC,
-                                       pf.SAMPLES_HIGH,
-                                       dt=0.1,
-                                       max_velocity=3,
-                                       max_acceleration=5,
-                                       max_jerk=25
-                                 )
-        self.modifier = pf.modifiers.TankModifier(self.middle_profile).modify(0.6)
-        self.left_profile = self.modifier.getRightTrajectory()
-        self.right_profile = self.modifier.getLeftTrajectory()
-        if self.drag_mode is None:
-            self.chart.setProfiles(self.middle_profile, self.left_profile, self.right_profile)
+    def create_profiles(self, dt=0.1):
+        if self.points and len(self.points) > 1:
+            try:
+                _, self.middle_profile = pf.generate(self.points,
+                                               pf.FIT_HERMITE_QUINTIC,
+                                               pf.SAMPLES_HIGH,
+                                               dt=dt,
+                                               max_velocity=3,
+                                               max_acceleration=5,
+                                               max_jerk=25
+                                         )
+                self.modifier = pf.modifiers.TankModifier(self.middle_profile).modify(0.6)
+                self.left_profile = self.modifier.getRightTrajectory()
+                self.right_profile = self.modifier.getLeftTrajectory()
+                if self.drag_mode is None:
+                    self.chart.setProfiles(self.middle_profile, self.left_profile, self.right_profile)
+            except:
+                print("Couldn't create path")
 
     def convert_gui_point_to_pf_point(self, x, y):
         x_scale = self.field_rect.width() / (52 * 0.3048)
@@ -255,7 +266,7 @@ class Map(QLabel):
 
         for i in range(2):
             path = [self.left_profile, self.right_profile][i]
-            pen.setColor(self.legend_info[['left', 'right'][i]]['color'])
+            pen.setColor(self.legend_info[['first', 'second'][i]]['color'])
             qp.setPen(pen)
             for i in range(1, len(path)):
                 pnt = path[i]
@@ -264,7 +275,7 @@ class Map(QLabel):
                     *self.convert_pf_point_to_gui_point(pnt),
                     *self.convert_pf_point_to_gui_point(pnt2)
                 )
-        pen.setColor(self.legend_info['middle']['color'])
+        pen.setColor(self.legend_info['main']['color'])
         pen.setWidth(3)
         qp.setPen(pen)
         for i in range(1, len(self.middle_profile)):

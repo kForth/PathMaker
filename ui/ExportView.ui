@@ -16,7 +16,7 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>90</y>
      <width>90</width>
      <height>20</height>
@@ -35,7 +35,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>10</y>
      <width>90</width>
      <height>20</height>
@@ -54,9 +54,9 @@
   <widget class="QPushButton" name="cancel_button">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>110</x>
      <y>360</y>
-     <width>70</width>
+     <width>90</width>
      <height>32</height>
     </rect>
    </property>
@@ -67,9 +67,9 @@
   <widget class="QPushButton" name="save_button">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>10</x>
      <y>360</y>
-     <width>70</width>
+     <width>90</width>
      <height>32</height>
     </rect>
    </property>
@@ -80,7 +80,7 @@
   <widget class="QFrame" name="export_mode">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>30</y>
      <width>190</width>
      <height>60</height>
@@ -107,8 +107,14 @@
     <property name="text">
      <string>Waypoints</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QRadioButton" name="trajectories_radio">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -128,7 +134,7 @@
   <widget class="QFrame" name="export_as">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>120</y>
      <width>190</width>
      <height>110</height>
@@ -155,6 +161,9 @@
     <property name="text">
      <string>CSV</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QRadioButton" name="json_radio">
     <property name="geometry">
@@ -170,6 +179,9 @@
     </property>
    </widget>
    <widget class="QRadioButton" name="cpp_radio">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -196,6 +208,9 @@
     </property>
    </widget>
    <widget class="QRadioButton" name="python_radio">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -212,7 +227,7 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>230</y>
      <width>90</width>
      <height>20</height>
@@ -231,7 +246,7 @@
   <widget class="QFrame" name="java_settings">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>10</x>
      <y>260</y>
      <width>190</width>
      <height>100</height>
@@ -277,12 +292,12 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>180</width>
+      <width>170</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Waypoints</string>
+     <string>Planned Path</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="package_name_input">
@@ -290,7 +305,7 @@
      <rect>
       <x>10</x>
       <y>70</y>
-      <width>180</width>
+      <width>170</width>
       <height>21</height>
      </rect>
     </property>
@@ -299,16 +314,104 @@
   <widget class="QPlainTextEdit" name="text_preview">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>210</x>
+     <y>30</y>
      <width>281</width>
-     <height>370</height>
+     <height>360</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font-size: 12px; overflow: scroll;</string>
    </property>
    <property name="readOnly">
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QFrame" name="csv_settings">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>190</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: none;</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QCheckBox" name="csv_headers_box">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>180</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Include Headers</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>10</y>
+     <width>90</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font-size: 18px;</string>
+   </property>
+   <property name="text">
+    <string>Preview:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+   </property>
+  </widget>
+  <widget class="QFrame" name="cpp_settings">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>190</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: none;</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+  </widget>
+  <zorder>csv_settings</zorder>
+  <zorder>label</zorder>
+  <zorder>label_2</zorder>
+  <zorder>cancel_button</zorder>
+  <zorder>save_button</zorder>
+  <zorder>export_mode</zorder>
+  <zorder>export_as</zorder>
+  <zorder>label_3</zorder>
+  <zorder>java_settings</zorder>
+  <zorder>text_preview</zorder>
+  <zorder>label_6</zorder>
+  <zorder>cpp_settings</zorder>
  </widget>
  <resources/>
  <connections/>

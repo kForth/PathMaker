@@ -18,15 +18,23 @@ class MainWindow(QMainWindow):
         uic.loadUi('ui/MainView.ui', self)
         self.setFixedSize(self.size())
 
+        self.points = []
+
         self.legend_info = {
-            'middle': {
+            'main': {
                 'color': QColor(50, 220, 50)
             },
-            'left': {
+            'first': {
                 'color': QColor(220, 50, 50)
             },
-            'right': {
+            'second': {
                 'color': QColor(50, 50, 220)
+            },
+            'third': {
+                'color': QColor(110, 110, 50)
+            },
+            'fourth': {
+                'color': QColor(50, 110, 110)
             },
             'pos': {
                 'style': Qt.SolidLine
@@ -42,9 +50,9 @@ class MainWindow(QMainWindow):
         self.chart = Chart(self.chart_label, self.legend_info)
         self.chart.setup_legend(
             self.home_button,
-            self.left_profile_checkbox,
-            self.right_profile_checkbox,
-            self.middle_profile_checkbox,
+            self.first_path_box,
+            self.second_path_box,
+            self.main_path_box,
             self.pos_profile_checkbox,
             self.vel_profile_checkbox,
             self.accel_profile_checkbox,
@@ -56,8 +64,8 @@ class MainWindow(QMainWindow):
         )
         self.map = Map(self.background_label, self.chart, self.legend_info)
 
-        for path in ['left', 'right', 'middle']:
-            label = eval("self." + path + "_line_label")
+        for path in ['main', 'first', 'second', 'third', 'fourth']:
+            label = eval("self." + path + "_path_label")
             pixmap = QPixmap(label.size())
             pixmap.fill(self.legend_info[path]['color'])
             label.setPixmap(pixmap)
@@ -78,17 +86,26 @@ class MainWindow(QMainWindow):
 
         self.add_button.clicked.connect(self.add_waypoint)
         self.waypoint_table.setColumnCount(3)
-        self.waypoint_table.setHorizontalHeaderLabels(("X", "Y", "Angle"))
+        self.waypoint_table.setHorizontalHeaderLabels(("X(m)", "Y(m)", "Angle(deg)"))
         self.waypoint_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.waypoint_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.waypoint_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.waypoint_table.itemChanged.connect(self.update_from_table)
 
+
+        self.action_new.triggered.connect(self.new)
+        self.action_export.triggered.connect(self.export)
         self.export_button.clicked.connect(self.export)
 
         self.show()
 
+    def new(self):
+        self.map.reset()
+        self.chart.reset()
+        self.update_waypoints()
+
     def export(self):
+        self.map.create_profiles(dt=0.01)
         self.export_window = ExportWindow(
             self.map.get_points(),
             self.map.get_middle_profile(), 
@@ -108,7 +125,7 @@ class MainWindow(QMainWindow):
             pnt = self.map.points[i]
             self.waypoint_table.setItem(i, 0, QTableWidgetItem(str(round(pnt.x, 2))))
             self.waypoint_table.setItem(i, 1, QTableWidgetItem(str(round(pnt.y, 2))))
-            self.waypoint_table.setItem(i, 2, QTableWidgetItem(str(round(((math.pi * 2) - pnt.angle) % (math.pi * 2) * (180 / math.pi), 2))))
+            self.waypoint_table.setItem(i, 2, QTableWidgetItem(str(round(((math.pi * 2) - pnt.angle) % (math.pi * 2) * (180 / math.pi)))))
 
     def update_from_table(self, item):
         pnt = self.map.points[item.row()]
