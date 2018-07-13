@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def export(self):
-        self.export_Window = ExportWindow(
+        self.export_window = ExportWindow(
             self.map.get_points(),
             self.map.get_middle_profile(), 
             self.map.get_left_profile(), 
@@ -124,3 +124,9 @@ class MainWindow(QMainWindow):
         if self.map.paint():
             self.update_waypoints()
         self.chart.paint()
+
+    def close(self):
+        try:
+            self.export_window.close()
+        finally:
+            super().close()
