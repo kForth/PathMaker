@@ -14,6 +14,8 @@ This program is very incomplete and a lot of UI features don't work.
 
 <b>Ctrl+Click</b> on a Waypoint to delete it.
 
-## Preview
+## Screenshots
 
 ![Preview](../media/preview.png?raw=true)
+
+![Export](../media/export.png?raw=true)
